@@ -382,3 +382,37 @@ DELIMITER ;
 select * from producto where id_producto = 1; -- stock 24
 CALL ActualizarStockProducto(1);
 select * from producto where id_producto = 1; -- stock 23
+
+
+
+-- versión con condicional 
+DELIMITER $$
+
+CREATE PROCEDURE ActualizarStockProducto2(IN p_id_producto INT)
+BEGIN
+    DECLARE v_stock INT;
+    
+    SELECT stock INTO v_stock FROM producto WHERE id_producto = p_id_producto;
+    
+    -- Verificar si el stock es mayor o igual a cero y devolver un mensaje
+    IF v_stock >= 0 THEN
+        UPDATE producto AS p
+        SET p.stock = p.stock - 1
+        WHERE p.id_producto = p_id_producto;
+    
+        SELECT 'Stock actualizado exitosamente' AS mensaje;
+    ELSE
+        SELECT 'Error: Stock insuficiente' AS mensaje;
+    END IF;
+END $$
+
+DELIMITER ;
+
+select * from producto where stock = 1;
+CALL ActualizarStockProducto2(23);
+select * from producto where stock = 1;
+
+insert into producto (marca, modelo,talle,fk_idProveedor,precio,fecha_ingreso,genero,stock)
+values 
+('Jordan', 'Air Jordan 11', 12, 2,180.00, '2023-04-09', 'Male', 1),
+('Jordan', 'Air Jordan 11', 11.5, 2,180.00, '2023-04-09', 'Male', 1);
