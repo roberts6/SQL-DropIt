@@ -370,11 +370,11 @@ select * from cliente order by id_cliente desc limit 1;
 -- procedure que actualiza productos en la tabla producto 
 DELIMITER $$
 
-CREATE PROCEDURE ActualizarStockProducto(IN fk_idProducto INT)
+CREATE PROCEDURE ActualizarStockProducto(IN p_id_producto INT)
 BEGIN
     UPDATE producto AS p
     SET p.stock = p.stock - 1
-    WHERE p.id_producto = fk_idProducto;
+    WHERE p.id_producto = p_id_producto;
 END $$
 
 DELIMITER ;
