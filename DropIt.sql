@@ -364,5 +364,21 @@ DELIMITER ;
 -- llamada para insertar un cliente
 CALL InsertarCliente('Oscar', 'Roberts', 'roberts_oscar@hotmail.com', '1987-12-26', 'MALE');
 
-select email from cliente where email like '%hotmail.com';
+select * from cliente order by id_cliente desc limit 1;
 
+
+-- procedure que elimina y actualiza productos en la tabla producto 
+DELIMITER $$
+
+CREATE PROCEDURE ActualizarStockProducto(IN fk_idProducto INT)
+BEGIN
+    UPDATE producto AS p
+    SET p.stock = p.stock - 1
+    WHERE p.id_producto = fk_idProducto;
+END $$
+
+DELIMITER ;
+
+select * from producto where id_producto = 1; -- stock 24
+CALL ActualizarStockProducto(1);
+select * from producto where id_producto = 1; -- stock 23
