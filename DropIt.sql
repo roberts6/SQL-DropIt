@@ -322,3 +322,47 @@ $$
 
 SELECT stock_producto (4, 5);
 
+
+-- Procedure que busca por talle
+drop procedure if exists buscar_por_talle;
+
+DELIMITER $$
+
+CREATE PROCEDURE buscar_por_talle(IN talle INT)
+BEGIN
+    SET @v_consulta = CONCAT('SELECT id_producto, marca, modelo, talle, precio, genero, stock FROM producto WHERE talle = ', talle);
+    PREPARE consulta FROM @v_consulta;
+    EXECUTE consulta;
+    DEALLOCATE PREPARE consulta;
+END $$
+
+DELIMITER ;
+
+
+-- Llamada al procedimiento 
+CALL buscar_por_talle(12);
+
+
+-- Procedure que inserta un cliente 
+
+DELIMITER $$
+
+CREATE PROCEDURE InsertarCliente(
+    IN p_nombre VARCHAR(255),
+    IN p_apellido VARCHAR(255),
+    IN p_email VARCHAR(255),
+    IN p_fecha_nacimiento DATE,
+    IN p_genero VARCHAR(255)
+)
+BEGIN
+    INSERT INTO cliente (nombre, apellido, email, fecha_nacimiento, genero)
+    VALUES (p_nombre, p_apellido, p_email, p_fecha_nacimiento, p_genero);
+END $$
+
+DELIMITER ;
+
+-- llamada para insertar un cliente
+CALL InsertarCliente('Oscar', 'Roberts', 'roberts_oscar@hotmail.com', '1987-12-26', 'MALE');
+
+select email from cliente where email like '%hotmail.com';
+
