@@ -367,7 +367,7 @@ CALL InsertarCliente('Oscar', 'Roberts', 'roberts_oscar@hotmail.com', '1987-12-2
 select * from cliente order by id_cliente desc limit 1;
 
 
--- procedure que elimina y actualiza productos en la tabla producto 
+-- procedure que actualiza productos en la tabla producto 
 DELIMITER $$
 
 CREATE PROCEDURE ActualizarStockProducto(IN fk_idProducto INT)
