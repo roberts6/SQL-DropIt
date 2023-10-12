@@ -272,9 +272,6 @@ LIMIT 3;
 
 SELECT * FROM compras_historico;
 
-SET FOREIGN_KEY_CHECKS = 1;
-truncate table producto;
-
 alter table cliente
 add column genero varchar(45) not null;
 
@@ -362,7 +359,7 @@ END $$
 DELIMITER ;
 
 -- llamada para insertar un cliente
-CALL InsertarCliente('Oscar', 'Roberts', 'roberts_oscar@hotmail.com', '1987-12-26', 'MALE');
+CALL InsertarCliente('Benicio', 'Roberts', 'roberts_beni@hotmail.com', '2020-5-20', 'MALE');
 
 select * from cliente order by id_cliente desc limit 1;
 
@@ -408,11 +405,137 @@ END $$
 
 DELIMITER ;
 
-select * from producto where stock = 1;
-CALL ActualizarStockProducto2(23);
+select * from producto where stock > 3;
+CALL ActualizarStockProducto2(9);
 select * from producto where stock = 1;
 
 insert into producto (marca, modelo,talle,fk_idProveedor,precio,fecha_ingreso,genero,stock)
 values 
 ('Jordan', 'Air Jordan 11', 12, 2,180.00, '2023-04-09', 'Male', 1),
 ('Jordan', 'Air Jordan 11', 11.5, 2,180.00, '2023-04-09', 'Male', 1);
+
+
+-- Triggers
+
+-- Creo tabla para guardar la acción del trigger que guarda ventas
+CREATE TABLE ventas_mensual(
+id_venta INT,
+producto VARCHAR (100),
+id_producto INT,
+cantidad INT,
+stock_viejo INT,
+stock_actual INT,
+fecha DATE
+);
+
+select * from ventas_mensual;
+
+DELIMITER $$
+
+CREATE TRIGGER InsertarVentaMensual
+AFTER INSERT ON compra
+FOR EACH ROW
+BEGIN
+DECLARE v_id_compra INT;
+    DECLARE v_productos VARCHAR(255);
+    DECLARE v_cantidad INT;
+    DECLARE v_id_producto INT;
+    DECLARE v_stock INT;
+    DECLARE v_precio DECIMAL(10, 2);
+    DECLARE v_monto_total DECIMAL(10, 2);
+
+    -- Obtener los datos de la compra
+    SET v_id_compra = NEW.id_compra;
+    SET v_productos = NEW.productos;
+    SET v_cantidad = NEW.cantidad;
+
+    -- Obtener el ID del producto desde la lista de productos
+    SET v_id_producto = (SELECT id_producto FROM producto WHERE id_producto IN (v_productos));
+
+    -- Obtener el stock y precio del producto
+    SELECT precio INTO v_precio FROM producto WHERE id_producto = v_id_producto;
+    SELECT p.stock INTO v_stock FROM producto as p
+    join carrito as c ON (id_producto = v_id_producto)
+    WHERE id_producto = v_id_producto;
+    -- Calcular el monto total de la venta
+    SET v_monto_total = v_precio * v_cantidad;
+
+    -- Insertar los datos en la tabla de ventas mensual
+    INSERT INTO ventas_mensual (id_compra, id_producto, productos, cantidad, stock, precio)
+    VALUES (v_id_compra, v_id_producto, v_productos, v_cantidad, v_stock, v_precio);
+END $$
+
+DELIMITER ;
+
+SET FOREIGN_KEY_CHECKS = 0;
+select * from cliente;
+select * from ventas_mensual;
+describe compra;
+
+
+-- Trigger que se dispara cada vez que hay una actualización en o los atributos de un cliente. Deja guardado el estado original
+CREATE TABLE actualizaciones_clientes(
+id_cliente INT,
+nombre VARCHAR (100),
+apellido VARCHAR (100),
+email VARCHAR (100),
+fecha_nacimiento VARCHAR (100),
+fecha_cambio VARCHAR(45)
+);
+
+DELIMITER $$
+
+Create trigger tr_actualizaciones_clientes
+after update on cliente
+for each row 
+begin
+insert into actualizaciones_clientes (id_cliente, nombre, apellido, email, fecha_nacimiento, fecha_cambio)
+values(old.id_cliente, old.nombre, old.apellido, old.email, old.fecha_nacimiento, current_timestamp());
+end
+
+$$
+
+select * from actualizaciones_clientes;
+
+
+-- este trigger se dispara cuando hay una nueva compra. Por un lado llena el detalle de compra y por otro 
+-- envía la orden al warehouse para que sea preparado y enviado.
+CREATE TABLE warehouse
+(
+    id_orden INT NOT NULL AUTO_INCREMENT,
+    fk_idCarrito INT NOT NULL,
+    fk_idProducto INT NOT NULL,
+    cantidad INT NOT NULL,
+    PRIMARY KEY (id_orden)
+);
+
+
+CREATE TABLE facturacion (
+id_factura INT NOT NULL auto_increment,
+fecha_facturacion DATE,
+id_cliente INT NOT NULL,
+producto VARCHAR (100),
+subtotal DECIMAL (10,2),
+cantidad INT,
+total DECIMAL (10,2),
+PRIMARY KEY(id_factura)
+);
+
+
+alter table facturacion
+add column id_producto INT NOT NULL;
+
+DELIMITER $$
+
+CREATE TRIGGER tr_datalle_carrito
+AFTER INSERT ON compra
+FOR EACH ROW
+BEGIN
+   INSERT INTO warehouse (fk_idCarrito,fk_idProducto, cantidad )
+   VALUES( new.fk_idCarrito, new.fk_idProducto, new.cantidad);
+   
+   INSERT INTO facturacion (fecha_facturacion, productos, cantidad, total,fk_idProducto, fk_idCliente)
+   VALUES(current_timestamp(), new.productos,new.cantidad, new.total, new.fk_idProducto, new.fk_idProducto);
+END;
+
+$$
