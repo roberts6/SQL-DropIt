@@ -382,7 +382,6 @@ CALL ActualizarStockProducto(1);
 select * from producto where id_producto = 1; -- stock 23
 
 
-
 -- versión con condicional 
 DELIMITER $$
 
@@ -393,21 +392,21 @@ BEGIN
     SELECT stock INTO v_stock FROM producto WHERE id_producto = p_id_producto;
     
     -- Verificar si el stock es mayor o igual a cero y devolver un mensaje
-    IF v_stock >= 0 THEN
+    IF v_stock > 0 THEN
         UPDATE producto AS p
         SET p.stock = p.stock - 1
         WHERE p.id_producto = p_id_producto;
     
         SELECT 'Stock actualizado exitosamente' AS mensaje;
     ELSE
-        SELECT 'Error: Stock insuficiente' AS mensaje;
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No hay suficiente stock para realizar la compra';
     END IF;
 END $$
 
 DELIMITER ;
 
-select * from producto where stock > 3;
-CALL ActualizarStockProducto2(9);
+select * from producto where stock = 1;
+CALL ActualizarStockProducto2(6);
 select * from producto where stock = 1;
 
 insert into producto (marca, modelo,talle,fk_idProveedor,precio,fecha_ingreso,genero,stock)
