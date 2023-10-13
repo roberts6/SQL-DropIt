@@ -1,0 +1,21 @@
+productos,cantidad,total,fk_idProducto,fk_idCarrito,fk_idCliente
+Air Jordan 5,2,380,1,1,1
+Air Jordan 2,3,450,2,3,1
+Air Jordan 11,1,180,11,5,3
+Air Jordan 3,4,680,3,7,4
+Air Jordan 1,2,300,1,9,6
+Air Jordan 4,3,600,4,11,6
+Air Jordan 5,1,190,5,13,7
+Air Jordan 10,2,300,10,15,8
+Air Jordan 8,3,510,8,17,9
+Air Jordan 7,4,720,7,19,10
+Air Jordan 9,2,360,9,21,11
+Air Jordan 6,3,510,6,23,12
+Air Jordan 4,1,200,4,25,1
+Air Jordan 1,2,300,1,27,14
+Air Jordan 12,3,540,12,29,15
+Air Jordan 2,4,600,2,31,6
+Air Jordan 11,2,360,11,33,17
+Air Jordan 3,3,510,3,35,6
+Air Jordan 5,1,190,5,37,19
+Air Jordan 10,2,300,10,39,20
