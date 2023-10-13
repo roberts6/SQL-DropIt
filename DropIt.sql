@@ -108,29 +108,31 @@ INSERT INTO proveedor (nombre, tel, contacto) VALUES
     ('Proveedor 5', '777-888-9999', 'Mila');
 
 
+select * from producto;
+
 -- Agrego datos a la tabla "producto"
-INSERT INTO producto (marca, modelo, talle, precio, fk_idProveedor, fecha_ingreso)
+INSERT INTO producto (marca, modelo, talle, precio, fk_idProveedor, fecha_ingreso, stock)
 VALUES
-('Jordan', 'Air Jordan 1', 8.5, 150.00, 3, '2023-01-03'),
-('Jordan', 'Air Jordan 1', 9.0, 150.00, 1, '2023-01-03'),
-('Jordan', 'Air Jordan 1', 9.5, 150.00, 5, '2023-01-03'),
-('Jordan', 'Air Jordan 1', 10.0, 150.00, 2, '2023-01-04'),
-('Jordan', 'Air Jordan 4', 8.5, 200.00, 6, '2023-01-05'),
-('Jordan', 'Air Jordan 4', 9.0, 200.00, 1, '2023-01-06'),
-('Jordan', 'Air Jordan 4', 9.5, 200.00, 4, '2023-01-07'),
-('Jordan', 'Air Jordan 4', 10.0, 200.00, 3, '2023-04-09'),
-('Jordan', 'Air Jordan 11', 8.5, 180.00, 2, '2023-04-09'),
-('Jordan', 'Air Jordan 11', 9.0, 180.00, 5, '2023-05-10'),
-('Jordan', 'Air Jordan 11', 9.5, 180.00, 1, '2023-01-11'),
-('Jordan', 'Air Jordan 11', 10.0, 180.00, 4, '2023-01-12'),
-('Jordan', 'Air Jordan 3', 8.5, 170.00, 6, '2023-01-13'),
-('Jordan', 'Air Jordan 3', 9.0, 170.00, 2, '2023-05-10'),
-('Jordan', 'Air Jordan 3', 9.5, 170.00, 3, '2023-01-15'),
-('Jordan', 'Air Jordan 3', 10.0, 170.00, 1, '2023-01-16'),
-('Jordan', 'Air Jordan 5', 8.5, 190.00, 4, '2023-04-17'),
-('Jordan', 'Air Jordan 5', 9.0, 190.00, 5, '2023-01-18'),
-('Jordan', 'Air Jordan 5', 9.5, 190.00, 6, '2023-01-19'),
-('Jordan', 'Air Jordan 5', 10.0, 190.00, 3, '2023-01-19');
+('Jordan', 'Air Jordan 1', 8.5, 150.00, 3, '2023-01-03',20),
+('Jordan', 'Air Jordan 1', 9.0, 150.00, 1, '2023-01-03',10),
+('Jordan', 'Air Jordan 1', 9.5, 150.00, 5, '2023-01-03',4),
+('Jordan', 'Air Jordan 1', 10.0, 150.00, 2, '2023-01-04',7),
+('Jordan', 'Air Jordan 4', 8.5, 200.00, 6, '2023-01-05',2),
+('Jordan', 'Air Jordan 4', 9.0, 200.00, 1, '2023-01-06',1),
+('Jordan', 'Air Jordan 4', 9.5, 200.00, 4, '2023-01-07',5),
+('Jordan', 'Air Jordan 4', 10.0, 200.00, 3, '2023-04-09',1),
+('Jordan', 'Air Jordan 11', 8.5, 180.00, 2, '2023-04-09',3),
+('Jordan', 'Air Jordan 11', 9.0, 180.00, 5, '2023-05-10',2),
+('Jordan', 'Air Jordan 11', 9.5, 180.00, 1, '2023-01-11',6),
+('Jordan', 'Air Jordan 11', 10.0, 180.00, 4, '2023-01-12',11),
+('Jordan', 'Air Jordan 3', 8.5, 170.00, 6, '2023-01-13',5),
+('Jordan', 'Air Jordan 3', 9.0, 170.00, 2, '2023-05-10',4),
+('Jordan', 'Air Jordan 3', 9.5, 170.00, 3, '2023-01-15',7),
+('Jordan', 'Air Jordan 3', 10.0, 170.00, 1, '2023-01-16',5),
+('Jordan', 'Air Jordan 5', 8.5, 190.00, 4, '2023-04-17',3),
+('Jordan', 'Air Jordan 5', 9.0, 190.00, 5, '2023-01-18',2),
+('Jordan', 'Air Jordan 5', 9.5, 190.00, 6, '2023-01-19',8),
+('Jordan', 'Air Jordan 5', 10.0, 190.00, 3, '2023-01-19',9);
 
 
 
@@ -335,7 +337,6 @@ END $$
 
 DELIMITER ;
 
-
 -- Llamada al procedimiento 
 CALL buscar_por_talle(12);
 
@@ -430,6 +431,8 @@ fecha DATE
 
 select * from ventas_mensual;
 
+
+-- Trigger que guarda histórico de ventas
 DELIMITER $$
 
 CREATE TRIGGER InsertarVentaMensual
@@ -473,7 +476,7 @@ select * from ventas_mensual;
 describe compra;
 
 
--- Trigger que se dispara cada vez que hay una actualización en o los atributos de un cliente. Deja guardado el estado original
+
 CREATE TABLE actualizaciones_clientes(
 id_cliente INT,
 nombre VARCHAR (100),
@@ -483,6 +486,9 @@ fecha_nacimiento VARCHAR (100),
 fecha_cambio VARCHAR(45)
 );
 
+
+-- Trigger que se dispara cada vez que hay una actualización en o los atributos de un cliente.
+-- Deja guardado el estado anterior
 DELIMITER $$
 
 Create trigger tr_actualizaciones_clientes
@@ -494,12 +500,13 @@ values(old.id_cliente, old.nombre, old.apellido, old.email, old.fecha_nacimiento
 end
 
 $$
+DELIMITER;
+
 
 select * from actualizaciones_clientes;
 
 
--- este trigger se dispara cuando hay una nueva compra. Por un lado llena el detalle de compra y por otro 
--- envía la orden al warehouse para que sea preparado y enviado.
+
 CREATE TABLE warehouse
 (
     id_orden INT NOT NULL AUTO_INCREMENT,
@@ -509,11 +516,14 @@ CREATE TABLE warehouse
     PRIMARY KEY (id_orden)
 );
 
+DROP table warehouse;
+
 
 CREATE TABLE facturacion (
 id_factura INT NOT NULL auto_increment,
 fecha_facturacion DATE,
 id_cliente INT NOT NULL,
+id_producto INT NOT NULL,
 producto VARCHAR (100),
 subtotal DECIMAL (10,2),
 cantidad INT,
@@ -521,10 +531,8 @@ total DECIMAL (10,2),
 PRIMARY KEY(id_factura)
 );
 
-
-alter table facturacion
-add column id_producto INT NOT NULL;
-
+-- este trigger se dispara cuando hay una nueva compra. Por un lado llena el detalle de compra y por otro 
+-- envía la orden al warehouse para que sea preparado y enviado.
 DELIMITER $$
 
 CREATE TRIGGER tr_datalle_carrito
@@ -534,8 +542,8 @@ BEGIN
    INSERT INTO warehouse (fk_idCarrito,fk_idProducto, cantidad )
    VALUES( new.fk_idCarrito, new.fk_idProducto, new.cantidad);
    
-   INSERT INTO facturacion (fecha_facturacion, productos, cantidad, total,fk_idProducto, fk_idCliente)
-   VALUES(current_timestamp(), new.productos,new.cantidad, new.total, new.fk_idProducto, new.fk_idProducto);
+   INSERT INTO facturacion (fecha_facturacion, producto, cantidad, total,fk_idProducto, fk_idCliente)
+   VALUES(current_timestamp(), new.producto,new.cantidad, new.total, new.fk_idProducto, new.fk_idProducto);
 END;
 
 $$
