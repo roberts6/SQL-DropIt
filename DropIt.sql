@@ -381,7 +381,7 @@ select * from producto where id_producto = 1; -- stock 24
 CALL ActualizarStockProducto(1);
 select * from producto where id_producto = 1; -- stock 23
 
-
+drop procedure ActualizarStockProducto2;
 -- versión con condicional 
 DELIMITER $$
 
@@ -397,7 +397,7 @@ BEGIN
         SET p.stock = p.stock - 1
         WHERE p.id_producto = p_id_producto;
     
-        SELECT 'Stock actualizado exitosamente' AS mensaje;
+        SELECT 'Operación exitosa' AS mensaje;
     ELSE
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No hay suficiente stock para realizar la compra';
     END IF;
@@ -405,8 +405,8 @@ END $$
 
 DELIMITER ;
 
-select * from producto where stock = 1;
-CALL ActualizarStockProducto2(6);
+select * from producto where stock > 1;
+CALL ActualizarStockProducto2(1);
 select * from producto where stock = 1;
 
 insert into producto (marca, modelo,talle,fk_idProveedor,precio,fecha_ingreso,genero,stock)
@@ -422,11 +422,17 @@ CREATE TABLE ventas_mensual(
 id_venta INT,
 producto VARCHAR (100),
 id_producto INT,
+id_cliente INT,
 cantidad INT,
 stock_viejo INT,
 stock_actual INT,
-fecha DATE
+fecha DATE,
+FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente),
+FOREIGN KEY (id_producto) REFERENCES producto(id_producto)
 );
+
+alter table ventas_mensual
+modify column id_venta INT NOT NULL PRIMARY KEY auto_increment;
 
 select * from ventas_mensual;
 
@@ -475,14 +481,14 @@ select * from ventas_mensual;
 describe compra;
 
 
-
 CREATE TABLE actualizaciones_clientes(
-id_cliente INT,
+id_cliente INT NOT NULL,
 nombre VARCHAR (100),
 apellido VARCHAR (100),
 email VARCHAR (100),
 fecha_nacimiento VARCHAR (100),
-fecha_cambio VARCHAR(45)
+fecha_cambio VARCHAR(45),
+FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente)
 );
 
 
@@ -511,11 +517,14 @@ CREATE TABLE warehouse
     id_orden INT NOT NULL AUTO_INCREMENT,
     fk_idCarrito INT NOT NULL,
     fk_idProducto INT NOT NULL,
+    fk_idCliente INT NOT NULL,
     cantidad INT NOT NULL,
-    PRIMARY KEY (id_orden)
+    PRIMARY KEY (id_orden),
+    FOREIGN KEY (fk_idCarrito) REFERENCES carrito(id_carrito),
+    FOREIGN KEY (fk_idProducto) REFERENCES producto(id_producto),
+    FOREIGN KEY (fk_idCliente) REFERENCES cliente(id_cliente)
 );
 
-DROP table warehouse;
 
 
 CREATE TABLE facturacion (
@@ -527,7 +536,9 @@ producto VARCHAR (100),
 subtotal DECIMAL (10,2),
 cantidad INT,
 total DECIMAL (10,2),
-PRIMARY KEY(id_factura)
+PRIMARY KEY(id_factura),
+FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente),
+FOREIGN KEY (id_producto) REFERENCES producto(id_producto)
 );
 
 -- este trigger se dispara cuando hay una nueva compra. Por un lado llena el detalle de compra y por otro 
