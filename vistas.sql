@@ -73,7 +73,7 @@ SELECT
             ) YEAR
         ),
         CURDATE()
-    ) AS dias_faltantes
+    ) AS dias_faltantes, email
 FROM cliente
 WHERE DATEDIFF(
         DATE_ADD(
