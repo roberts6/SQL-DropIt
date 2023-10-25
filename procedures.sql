@@ -48,7 +48,7 @@ select * from cliente order by id_cliente desc limit 1;
 -- procedure que actualiza productos en la tabla producto 
 DELIMITER $$
 
-CREATE PROCEDURE ActualizarStockProducto2(IN p_id_producto INT)
+CREATE PROCEDURE ActualizarStockProducto(IN p_id_producto INT)
 BEGIN
     DECLARE v_stock INT;
     
@@ -69,7 +69,7 @@ END $$
 DELIMITER ;
 
 select * from producto where stock > 1;
-CALL ActualizarStockProducto2(1);
+CALL ActualizarStockProducto(2);
 select * from producto where stock = 1;
 
 insert into producto (marca, modelo,talle,fk_idProveedor,precio,fecha_ingreso,genero,stock)

@@ -16,3 +16,11 @@ GRANT SELECT ON  *.* TO  'Oscar'@'CoderHouse';
 
 -- Este usuario puede leer, insertar y modificar todos los objetos.
 GRANT SELECT, INSERT, UPDATE ON  *.* TO  'Jose'@'CoderHouse';
+
+
+
+
+GRANT ALL ON  *.* TO  'Oscar'@'CoderHouse';
+REVOKE ALL ON *.* FROM 'Oscar'@'CoderHouse'; -- marca error de tipeo pero está ok
+
+DROP USER 'Oscar'@'localhost';

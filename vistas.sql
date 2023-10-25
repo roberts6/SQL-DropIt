@@ -50,9 +50,10 @@ select * FROM hombres_compradores_mujer;
 
 -- Vista de carritos abandonados
 CREATE OR REPLACE VIEW carrito_abandonado as
-SELECT ca.id_carrito, ca.fecha, c.nombre, c.email
+SELECT ca.id_carrito, ca.fecha AS fecha_abandono,c.id_cliente, c.nombre,pr.modelo, c.email, 'Abandonado' AS estado
 FROM carrito as ca
 join cliente as c ON (ca.fk_idCliente = c.id_cliente)
+join producto as pr ON (ca.fk_idProducto = pr.id_producto)
 WHERE ca.finalizado = 0;
 
 SELECT * FROM carrito_abandonado;

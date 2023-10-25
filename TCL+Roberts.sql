@@ -1,4 +1,4 @@
-use DropIt;
+use dropitCoderHouse;
 SET FOREIGN_KEY_CHECKS = 0; -- elimino la restricción de claves foráneas para que me deje trabajar sobre la tabla.
 TRUNCATE TABLE cliente; -- elimino todos los datos dentro de la tabla 'cliente'
 SELECT @@autocommit; -- reviso estado del autocommit
@@ -30,24 +30,26 @@ START TRANSACTION;
 
 SAVEPOINT ingresos_proveedor1;
 INSERT INTO producto (marca, modelo, talle,fk_idProveedor,fecha_ingreso,stock,precio,genero)
-VALUES('Jordan', 'Air Jordan 1', 8.5, 1,current_timestamp(), 20, 150.00, 'Hombre'),
-('Jordan', 'Air Jordan 4', 9.0, 1,current_timestamp(), 1, 180.00, 'Mujer'),
-('Jordan', 'Air Jordan 11', 10.0,1,current_timestamp(), 12, 170.00, 'Hombre'),
-('Jordan', 'Air Jordan 3', 9.5, 1, current_timestamp(),8, 190.00, 'Mujer');
+VALUES('Nike', 'Air Jordan 1', 8.5, 1,current_timestamp(), 20, 150.00, 'Hombre'),
+('Nike', 'Air Jordan 4', 9.0, 1,current_timestamp(), 1, 180.00, 'Mujer'),
+('Nike', 'Air Jordan 11', 10.0,1,current_timestamp(), 12, 170.00, 'Hombre'),
+('Nike', 'Air Jordan 3', 9.5, 1, current_timestamp(),8, 190.00, 'Mujer');
 
 SAVEPOINT ingresos_proveedor2;
 INSERT INTO producto (marca, modelo, talle,fk_idProveedor,fecha_ingreso,stock,precio,genero)
-VALUES('Jordan', 'Air Jordan 1', 12.5, 2,current_timestamp(), 20, 150.00, 'Hombre'),
-('Jordan', 'Air Jordan 4', 11.0, 2,current_timestamp(), 1, 180.00, 'Mujer'),
-('Jordan', 'Air Jordan 11', 13.0,2,current_timestamp(), 12, 170.00, 'Hombre'),
-('Jordan', 'Air Jordan 3', 11.5, 2, current_timestamp(),8, 190.00, 'Mujer');
+VALUES('JordanNike', 'Air Jordan 1', 12.5, 2,current_timestamp(), 20, 150.00, 'Hombre'),
+('JordanNike', 'Air Jordan 4', 11.0, 2,current_timestamp(), 1, 180.00, 'Mujer'),
+('JordanNike', 'Air Jordan 11', 13.0,2,current_timestamp(), 12, 170.00, 'Hombre'),
+('JordanNike', 'Air Jordan 3', 11.5, 2, current_timestamp(),8, 190.00, 'Mujer');
 
 SELECT pr.nombre AS proveedor, p.fk_idProveedor AS id_proveedor, COUNT(p.fk_idProveedor) AS cantidad
 FROM producto AS p
 JOIN proveedor AS pr ON p.fk_idProveedor = pr.id_proveedor
 GROUP BY p.fk_idProveedor;
 
-ROLLBACK TO ingresos_proveedor2;
+select * from producto;
+
+ROLLBACK TO ingresos_proveedor1;
 
 commit;
 
@@ -83,3 +85,13 @@ where fk_idProveedor = 1;
 ROLLBACK TO ingresos_proveedor1;
 
 commit;
+
+
+select * from producto
+where modelo like '%Air Jordan 1';
+
+delete from producto
+where id_producto = 39;
+
+INSERT INTO producto (marca, modelo, talle,fk_idProveedor,fecha_ingreso,stock,precio,genero)
+VALUES('Jordan', 'Air Jordan 1', 8.5, 1,current_timestamp(), 20, 150.00, 'Hombre');

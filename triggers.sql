@@ -56,47 +56,8 @@ INSERT INTO ingreso_producto  ( marca, modelo, talle, genero, stock, precio, fec
 VALUES('pepito', 'Air Jordan Oscar', 10.0, 'Hombre', 500, 6660.00, current_timestamp(), 2);
 
 select * from ingreso_producto;
-select * from producto where modelo = 'Air Jordan Oscar';
+select * from producto;
 
-
-
--- Trigger que guarda histórico de ventas
-DELIMITER $$
-
-CREATE TRIGGER tr_InsertarVentaMensual
-AFTER INSERT ON compra
-FOR EACH ROW
-BEGIN
-DECLARE v_id_compra INT;
-    DECLARE v_productos VARCHAR(255);
-    DECLARE v_cantidad INT;
-    DECLARE v_id_producto INT;
-    DECLARE v_stock INT;
-    DECLARE v_precio DECIMAL(10, 2);
-    DECLARE v_monto_total DECIMAL(10, 2);
-
-    -- Obtener los datos de la compra
-    SET v_id_compra = NEW.id_compra;
-    SET v_productos = NEW.productos;
-    SET v_cantidad = NEW.cantidad;
-
-    -- Obtener el ID del producto desde la lista de productos
-    SET v_id_producto = (SELECT id_producto FROM producto WHERE id_producto IN (v_productos));
-
-    -- Obtener el stock y precio del producto
-    SELECT precio INTO v_precio FROM producto WHERE id_producto = v_id_producto;
-    SELECT p.stock INTO v_stock FROM producto as p
-    join carrito as c ON (id_producto = v_id_producto)
-    WHERE id_producto = v_id_producto;
-    -- Calcular el monto total de la venta
-    SET v_monto_total = v_precio * v_cantidad;
-
-    -- Insertar los datos en la tabla de ventas mensual
-    INSERT INTO ventas_mensual (id_compra, id_producto, productos, cantidad, stock, precio)
-    VALUES (v_id_compra, v_id_producto, v_productos, v_cantidad, v_stock, v_precio);
-END $$
-
-DELIMITER ;
 
 
 -- Trigger que se dispara cada vez que hay una actualización en o los atributos de un cliente.
@@ -115,53 +76,74 @@ $$
 DELIMITER ;
 
 
--- este trigger se dispara cuando hay una nueva compra. Por un lado llena el detalle de compra y por otro 
--- envía la orden al warehouse para que sea preparado y enviado.
+-- trigger que al tener un carrito finalizado completa las tablas 'facturacion', 'warehouse', 'compra' y actualiza el stock en 'producto'
 DELIMITER $$
 
-CREATE TRIGGER tr_datalle_carrito
-AFTER INSERT ON compra
-FOR EACH ROW
-BEGIN
-   INSERT INTO warehouse (fk_idCarrito,fk_idProducto, cantidad )
-   VALUES( new.fk_idCarrito, new.fk_idProducto, new.cantidad);
-   
-   INSERT INTO facturacion (fecha_facturacion, producto, cantidad, total,fk_idProducto, fk_idCliente)
-   VALUES(current_timestamp(), new.producto,new.cantidad, new.total, new.fk_idProducto, new.fk_idProducto);
-END;
-
-$$
-
-DELIMITER ;
-
-
-
--- trigger que al tener un carrito finalizado completa las tablas 'detalle_carrito', 'warehouse' y 'compra'
-DELIMITER $$
-
-CREATE TRIGGER tr_carrito_finazalido
+CREATE TRIGGER tr_carrito_finalizado
 AFTER INSERT ON carrito
 FOR EACH ROW
 BEGIN
-DECLARE v_finalizado INT;
-DECLARE v_id_producto INT;
-DECLARE v_id_proveedor INT;
-DECLARE v_id_cliente INT;
-DECLARE v_marca VARCHAR(45);
-DECLARE v_modelo VARCHAR(45);
-DECLARE v_genero VARCHAR(45);
-DECLARE v_id_precio DECIMAL (10,2);
+    DECLARE v_id_carrito INT;
+    DECLARE v_finalizado INT;
+    DECLARE v_cantidad INT;
+    DECLARE v_id_producto INT;
+    DECLARE v_id_proveedor INT;
+    DECLARE v_id_cliente INT;
+    DECLARE v_marca VARCHAR(45);
+    DECLARE v_talle VARCHAR(45);
+    DECLARE v_modelo VARCHAR(45);
+    DECLARE v_genero VARCHAR(45);
+    DECLARE v_precio DECIMAL(10, 2);
 
-SELECT new.finalizado INTO v_finalizado;
+    SELECT new.id_carrito, new.finalizado, new.fk_idCliente, new.fk_idProducto, new.cantidad INTO v_id_carrito, v_finalizado, v_id_cliente, v_id_producto, v_cantidad;
 
--- IF v_finalizado = 1
-     
--- ELSE
--- END IF;
+    SELECT marca, modelo, genero, precio
+    INTO v_marca, v_modelo, v_genero, v_precio
+    FROM producto
+    WHERE id_producto = v_id_producto;
 
+    -- Verifica si el producto existe en la tabla "producto"
+    IF v_id_producto IS NOT NULL THEN
+        IF v_finalizado = 1 THEN
+            INSERT INTO warehouse (fk_idCliente, fk_idCarrito, fk_idProducto, cantidad)
+            VALUES (v_id_cliente, v_id_carrito, v_id_producto, v_cantidad);
+
+            INSERT INTO facturacion (id_cliente, fecha_facturacion, id_producto, producto, cantidad, subtotal, total)
+            VALUES (v_id_cliente, CURRENT_TIMESTAMP(), v_id_producto, v_modelo, v_cantidad, v_precio, (v_precio * v_cantidad) );
+
+            INSERT INTO compra (fk_idCliente, fk_idCarrito, fk_idProducto, productos, cantidad,total)
+            VALUES (v_id_cliente, v_id_carrito, v_id_producto, v_modelo, v_cantidad, (v_precio * v_cantidad));
+            
+            UPDATE producto
+            SET stock = stock - v_cantidad
+            WHERE id_producto = v_id_producto;
+        END IF;
+    END IF;
 END;
 $$
 
-
 DELIMITER ;
 
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+
+select * from warehouse;
+select * from facturacion;
+select * from producto;
+select * from compra;
+truncate table carrito;
+
+select * from carrito;
+select * from carrito_abandonado;
+
+insert into carrito (fecha, finalizado, fk_idProducto, fk_idCLiente, cantidad)
+VALUES (current_timestamp(), 0,22,5,1);
+
+select * from carrito;
+
+            UPDATE producto
+            SET stock = stock - 1
+            WHERE id_producto = 21;
+            
+DELETE FROM carrito WHERE id_carrito IN (305,306,307,308,309); 
