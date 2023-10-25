@@ -9,21 +9,17 @@ WHERE c.fecha_nacimiento <= '1990-01-01' AND c.fecha_nacimiento >= '1979-12-31' 
 
 SELECT * FROM v_cliente_ochentas;
 
--- Vista con el proveedor con más productos en venta
+-- Vista con el top 3 de proveedores con más productos vendidos
 CREATE OR REPLACE VIEW proveedor_mas_activo AS
-SELECT p.id_proveedor, p.nombre, p.contacto
-FROM proveedor AS p
-JOIN producto AS pr ON (p.id_proveedor = pr.fk_idProveedor)
-GROUP BY p.id_proveedor, p.nombre, p.contacto
-HAVING COUNT(pr.id_producto) = (
-    SELECT MAX(productos_venta)
-    FROM (
-        SELECT fk_idProveedor, COUNT(id_producto) AS productos_venta
-        FROM producto
-        GROUP BY fk_idProveedor
-    ) AS subconsulta
-);
- 
+SELECT c.fk_idProducto, p.id_proveedor, p.contacto, COUNT(c.fk_idProducto) AS cantidad
+FROM compra AS c
+JOIN producto AS pr ON pr.id_producto = c.fk_idProducto
+JOIN proveedor AS p ON p.id_proveedor = pr.fk_idProveedor
+GROUP BY c.fk_idProducto, p.id_proveedor, p.contacto
+ORDER BY cantidad DESC
+LIMIT 3;
+
+
 SELECT * FROM proveedor_mas_activo;
 
 
