@@ -29,7 +29,7 @@ SELECT * FROM proveedor_mas_activo;
 
 -- VISTA que reune la información de las mujeres que han comprado zapatillas de hombre
 CREATE OR REPLACE VIEW mujeres_compradoras_hombre as
-SELECT distinct c.id_cliente,c.nombre,c.email,c.fecha_nacimiento,c.id_compra
+SELECT distinct c.id_cliente,c.nombre,c.email,c.fecha_nacimiento,co.id_compra
 FROM cliente as c
 JOIN compra as co ON (c.id_cliente = co.fk_idCliente)
 JOIN producto as pr ON (co.fk_idProducto = pr.id_producto)
@@ -40,7 +40,7 @@ select * FROM mujeres_compradoras_hombre;
 
 -- VISTA que reune la información de los hombres que han comprado zapatillas de mujer
 CREATE OR REPLACE VIEW hombres_compradores_mujer as
-SELECT distinct c.id_cliente,c.nombre,c.email,c.fecha_nacimiento,c.id_compra
+SELECT distinct c.id_cliente,c.nombre,c.email,c.fecha_nacimiento,co.id_compra
 FROM cliente as c
 JOIN compra as co ON (c.id_cliente = co.fk_idCliente)
 JOIN producto as pr ON (co.fk_idProducto = pr.id_producto)
