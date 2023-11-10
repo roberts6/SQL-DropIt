@@ -75,6 +75,9 @@ contacto VARCHAR(45) NOT NULL,
 PRIMARY KEY (id_proveedor)
 );
 
+ALTER TABLE proveedor
+MODIFY COLUMN nombre_proveedor VARCHAR(100) NOT NULL;
+
 CREATE TABLE carrito (
 id_carrito INT auto_increment NOT NULL,
 fecha datetime NOT NULL,
@@ -92,6 +95,9 @@ ADD COLUMN cantidad INT NOT NULL;
 
 ALTER TABLE carrito
 MODIFY COLUMN fecha datetime NOT NULL default current_timestamp();
+
+ALTER TABLE carrito
+MODIFY COLUMN finalizado TINYINT(1) NOT NULL;
 
 ALTER TABLE carrito
 MODIFY COLUMN cantidad INT NOT NULL DEFAULT 1;
@@ -132,6 +138,9 @@ MODIFY COLUMN fk_idCarrito INT NOT NULL default 0;
 
 ALTER TABLE compra
 MODIFY COLUMN productos VARCHAR (200) NULL DEFAULT 'prueba';
+
+ALTER TABLE compra
+MODIFY COLUMN productos VARCHAR (200) NOT NULL DEFAULT 'Jordan';
 
 CREATE TABLE actualizaciones_clientes(
 id_cliente INT,
@@ -181,6 +190,15 @@ cantidad INT,
 total DECIMAL (10,2),
 PRIMARY KEY(id_factura)
 );
+
+ALTER TABLE facturacion
+MODIFY COLUMN subtotal DECIMAL (10,2) NOT NULL;
+
+ALTER TABLE facturacion
+MODIFY COLUMN cantidad INT NOT NULL;
+
+ALTER TABLE facturacion
+MODIFY COLUMN total DECIMAL (10,2) NOT NULL;
 
 CREATE TABLE ingreso_producto (
 marca VARCHAR(45) NOT NULL,
