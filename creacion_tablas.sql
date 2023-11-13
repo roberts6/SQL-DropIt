@@ -24,6 +24,11 @@ REFERENCES compra (id_compra);
 alter table cliente
 add column genero varchar(45) not null;
 
+ALTER TABLE cliente
+ADD CONSTRAINT id_compra
+FOREIGN KEY (id_compra)
+REFERENCES compra (id_compra);
+
 CREATE TABLE producto (
 id_producto INT auto_increment NOT NULL,
 marca VARCHAR(45) NOT NULL,
@@ -131,16 +136,14 @@ FOREIGN KEY (fk_idCliente) REFERENCES cliente(id_cliente)
 );
 
 ALTER TABLE compra
-MODIFY COLUMN total INT NOT NULL default 0;
+MODIFY COLUMN total INT NULL default 0;
 
 ALTER TABLE compra
 MODIFY COLUMN fk_idCarrito INT NOT NULL default 0;
 
-ALTER TABLE compra
-MODIFY COLUMN productos VARCHAR (200) NULL DEFAULT 'prueba';
 
 ALTER TABLE compra
-MODIFY COLUMN productos VARCHAR (200) NOT NULL DEFAULT 'Jordan';
+MODIFY COLUMN productos VARCHAR (200) NULL DEFAULT 'Jordan';
 
 CREATE TABLE actualizaciones_clientes(
 id_cliente INT,
@@ -192,13 +195,13 @@ PRIMARY KEY(id_factura)
 );
 
 ALTER TABLE facturacion
-MODIFY COLUMN subtotal DECIMAL (10,2) NOT NULL;
+MODIFY COLUMN subtotal DECIMAL (10,2) NULL;
 
 ALTER TABLE facturacion
 MODIFY COLUMN cantidad INT NOT NULL;
 
 ALTER TABLE facturacion
-MODIFY COLUMN total DECIMAL (10,2) NOT NULL;
+MODIFY COLUMN total DECIMAL (10,2) NULL;
 
 CREATE TABLE ingreso_producto (
 marca VARCHAR(45) NOT NULL,
