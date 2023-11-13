@@ -2,11 +2,17 @@
 
 -- Vista con el top 3 de proveedores con más productos vendidos
 CREATE OR REPLACE VIEW proveedor_mas_activo AS
-SELECT co.fk_idProducto as id_producto, sum(co.cantidad) AS cantidad_ventas, pr.modelo,pr.talle, p.nombre_proveedor, p.contacto
+SELECT
+    p.fk_idProveedor AS id_proveedor,
+    SUM(co.cantidad) AS cantidad_ventas,
+    MAX(p.modelo) AS modelo,
+    MAX(p.talle) AS talle,
+    pv.nombre_proveedor,
+    pv.contacto
 FROM compra AS co
-JOIN producto as pr ON pr.id_producto = co.fk_idProducto
-JOIN proveedor AS p ON pr.fk_idProveedor = p.id_proveedor
-GROUP BY co.fk_idProducto, p.nombre_proveedor, p.contacto
+JOIN producto AS p ON p.id_producto = co.fk_idProducto
+JOIN proveedor AS pv ON pv.id_proveedor = p.fk_idProveedor
+GROUP BY p.fk_idProveedor, pv.nombre_proveedor, pv.contacto
 ORDER BY cantidad_ventas DESC
 limit 3;
 
@@ -105,9 +111,9 @@ CREATE OR REPLACE VIEW cliente_decada AS
 SELECT
     CONCAT(YEAR(fecha_nacimiento) DIV 10 * 10, 's') AS Decada,
     COUNT(*) AS Cantidad_personas,
-    SUM(genero = 'Male') AS hombres,
-    SUM(genero = 'Female') AS mujeres,
-    SUM(genero NOT IN ('Male', 'Female')) AS otros
+    SUM(genero = 'Male') AS c_hombres,
+    SUM(genero = 'Female') AS c_mujeres,
+    SUM(genero NOT IN ('Male', 'Female')) AS c_otros
 FROM cliente
 GROUP BY Decada
 ORDER BY Decada;
@@ -120,9 +126,9 @@ CREATE OR REPLACE VIEW cliente_decada_compra AS
 SELECT
     CONCAT(YEAR(cl.fecha_nacimiento) DIV 10 * 10, 's') AS Decada,
     COUNT(*) AS Cantidad_personas,
-    SUM(cl.genero = 'Male') AS hombres,
-    SUM(cl.genero = 'Female') AS mujeres,
-    SUM(cl.genero NOT IN ('Male', 'Female')) AS otros,
+    SUM(cl.genero = 'Male') AS c_hombres,
+    SUM(cl.genero = 'Female') AS c_mujeres,
+    SUM(cl.genero NOT IN ('Male', 'Female')) AS c_otros,
     SUM(co.cantidad) AS compras_realizadas
 FROM cliente AS cl
 JOIN compra AS co ON co.fk_idCliente = cl.id_cliente
@@ -137,9 +143,9 @@ CREATE OR REPLACE VIEW cliente_GC_combinado AS
 SELECT
     cd.Decada,
     cd.Cantidad_personas,
-    cd.hombres,
-    cd.mujeres,
-    cd.otros,
+    cd.c_hombres,
+    cd.c_mujeres,
+    cd.c_otros,
     cdc.compras_realizadas
 FROM cliente_decada AS cd
 JOIN cliente_decada_compra AS cdc ON cd.Decada = cdc.Decada;

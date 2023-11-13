@@ -84,3 +84,6 @@ INSERT INTO cliente (nombre, apellido, email, genero, fecha_nacimiento) VALUES
 ('Abbe', 'Liston', 'aliston1n@nifty.com', 'Female', '1985-09-07'),
 ('Eadmund', 'Davidovitz', 'edavidovitz1o@over-blog.com', 'Male', '1995-11-30');
 
+INSERT INTO cliente (nombre, apellido, email, genero, fecha_nacimiento) VALUES
+('Jhon', 'Frusciante', 'jFrusciante@gmail.com', 'Male', '1970-05-05');
+
